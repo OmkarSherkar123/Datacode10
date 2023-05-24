@@ -1,0 +1,70 @@
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('Social_Network_Ads.csv')
+
+def Remove(df,var):
+    Q1 = df[var].quantile(0.25)
+    Q3 = df[var].quantile(0.25)
+    IQR = Q3-Q1
+    high,low = Q3+1.5*IQR, Q1-1.5*IQR
+
+    df = df[((df[var] >=low) & (df[var] <=high))]
+    return df
+
+def Display(df,message):
+    fig, axes = plt.subplots(1,2)
+    fig.suptitle(message)
+    sns.boxplot(data=df,x='Age', ax=axes[0])
+    sns.boxplot(data=df, x='EstimatedSalary', ax = axes[1])
+    fig.tight_layout()
+    plt.show()
+
+
+print(df.isnull().sum())
+
+#label encoding
+df['Gender'] = df['Gender'].astype('category')
+df['Gender'] = df['Gender'].cat.codes
+
+#finding and removing outlier
+Display(df,'Before')
+Remove(df,'Age')
+Remove(df,'EstimatedSalary')
+Display(df,'After')
+
+#correlation matrix
+sns.heatmap(df.corr(),annot=True)
+plt.show()
+
+x = df[['Age','EstimatedSalary']]
+y = df['Purchased']
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.20, random_state=0)
+
+# normalization
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+x_train = sc.fit_transform(x_train)
+x_test = sc.fit_transform(x_test)
+
+# logistic regression
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression(random_state = 0,solver='lbfgs')
+model.fit(x_train,y_train)
+y_pred = model.predict(x_test)
+
+# classification report
+from sklearn.metrics import classification_report
+print(classification_report(y_test,y_pred))
+
+#confusion matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
+fig, ax = plt.subplots(figsize=(5,5))
+sns.heatmap(cm,annot=True,linewidths=3,cmap="Blues")
+plt.show()

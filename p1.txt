@@ -1,0 +1,39 @@
+
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('placement_data.csv')
+
+#print info about dataset
+print(df.info)
+print(df.shape)
+print(df.size)
+print(df.columns)
+print(df.dtypes)
+print(df.head().T)
+print(df.tail().T)
+print(df.sample(5).T)
+
+#display stastical info
+print(df.describe())
+
+print(df.isnull().sum())
+
+#Data types conversion
+df['sl_no'] = df['sl_no'].astype('int8')
+print(df.dtypes)
+df['ssc_p'] = df['ssc_p'].astype('int8')
+print(df.dtypes)
+
+#label encoding using catcodes
+df['gender'] = df['gender'].astype('category')
+print(df.dtypes)
+df['gender'] = df['gender'].cat.codes
+print(df.dtypes['gender'])
+print(df['gender'].unique())
+
+#normalization using min-max
+df['salary'] = (df['salary']-df['salary'].min()) / (df['salary'].max()-df['salary'].min())
+print(df.head().T)
